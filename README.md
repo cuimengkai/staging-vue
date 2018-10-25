@@ -1,13 +1,14 @@
-```
-//依赖库 导入有先后
-//<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-//<script src="http://mockjs.com/dist/mock.js"></script>
-//<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
-//<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-//<script src="https://unpkg.com/vue-router@3.0.1/dist/vue-router.js"></script>
-//<script src="https://cdn.bootcss.com/vuex/3.0.1/vuex.js"></script>
-//<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
+### 依赖库 导入有先后 
+#### [Element-ui css](https://unpkg.com/element-ui/lib/theme-chalk/index.css)
+#### [Mock](http://mockjs.com/dist/mock.js)
+#### [Axios](https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js)
+#### [Vue](https://cdn.jsdelivr.net/npm/vue/dist/vue.js)
+#### [Vue-Router](https://unpkg.com/vue-router@3.0.1/dist/vue-router.js)
+#### [Vuex](https://cdn.bootcss.com/vuex/3.0.1/vuex.js)
+#### [Element-ui js](https://unpkg.com/element-ui/lib/index.js)
+
+```
 ;(function (Vue, Vuex, Mock, axios, Router) {
     //TODO mock
     // 基于Mock 声明接口 创建模拟数据
