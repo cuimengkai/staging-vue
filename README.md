@@ -7,8 +7,8 @@
 //<script src="https://cdn.bootcss.com/vuex/3.0.1/vuex.js"></script>
 //<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
-;(function (Vue, Vuex, Mock, axios) {
-
+;(function (Vue, Vuex, Mock, axios,Router) {
+    console.info(Router)
     // 创建数据
     const Random = Mock.Random;
     const produceNewsData = function () {
@@ -38,8 +38,8 @@
     }
 
     //注册Vuex依赖
-    Vue.use(Vuex)
-
+    Vue.use(Vuex);
+    Vue.use(Router);
     //创建购物车状态
     const cart = {
         namespaced: true,
@@ -219,13 +219,14 @@
                     <el-table-column label="操作" align="center">
                         <template slot-scope="scope">
                             <el-button size="mini" type="success" :disabled="!scope.row.inventory" @click="addProductToCart(scope.row)">添加到购物车</el-button>
+                            <el-button size="mini"><router-link to="detail">明细</router-link></el-button>
                         </template>
                     </el-table-column>
                 </el-table>
         `
     }
-    //创建App组件
-    const App = {
+    // 
+    const Main = {
         components: {ProductList, ShoppingCart}, // 注册组件
         template: `
             <div id="app">
@@ -233,15 +234,53 @@
                 <ShoppingCart/>
              </div>
         `
+        
+    }
+    const Detail = {
+        template: `
+            <div id="app">
+               路由跳转
+             </div>
+        `
+    }
+    //创建App组件
+    const App = {
+        template: `
+            <div id="app">
+                <router-view/>
+             </div>
+        `
     };
-
+    // 配置路由
+    const routes = [
+        {
+            path:'/',
+            redirect: '/home'
+        },
+        {
+            path:'/home',
+            name:'home',
+            component: Main
+        },
+        {
+            path:'/detail',
+            name:'detail',
+            component: Detail
+        }
+    ]
+    // 创建路由实例
+    const router = new Router({
+        routes,
+        mode: 'hash', // history
+    })
     //初始化Vue实例
     const app = new Vue({
         el: '#app',
         store: store,
+        router:router,
         render: h => h(App)
     })
-})(Vue, Vuex, Mock, axios);
+})(Vue, Vuex, Mock, axios, VueRouter);
 
 
 ```
