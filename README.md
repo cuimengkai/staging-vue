@@ -4,42 +4,69 @@
 //<script src="http://mockjs.com/dist/mock.js"></script>
 //<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
 //<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+//<script src="https://unpkg.com/vue-router@3.0.1/dist/vue-router.js"></script>
 //<script src="https://cdn.bootcss.com/vuex/3.0.1/vuex.js"></script>
 //<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
-;(function (Vue, Vuex, Mock, axios,Router) {
-    console.info(Router)
-    // 创建数据
-    const Random = Mock.Random;
-    const produceNewsData = function () {
-        let articles = [];
-        for (let i = 0; i < 10; i++) {
-            let newArticleObject = {
-                id: i,
-                title: Random.csentence(5, 10), //  Random.csentence( min, max )
-                price: 20,
-                inventory: 10,
+;(function (Vue, Vuex, Mock, axios, Router) {
+    //TODO mock
+    // 基于Mock 声明接口 创建模拟数据
+    ;(function (Mock) {
+        const Random = Mock.Random;
+        const produceNewsData = function () {
+            let articles = [];
+            for (let i = 0; i < 10; i++) {
+                let newArticleObject = {
+                    id: i,
+                    title: Random.csentence(5, 10), //  Random.csentence( min, max )
+                    price: 20,
+                    inventory: 10,
+                }
+                articles.push(newArticleObject)
             }
-            articles.push(newArticleObject)
-        }
 
-        return {
-            articles: articles
+            return {
+                articles: articles
+            }
         }
-    }
-    //声明接口
-    Mock.mock('/news/index', 'post', produceNewsData);
+        Mock.mock('/news/index', 'post', produceNewsData);
+        return Mock
+    })(Mock);
 
+    //TODO API
     //定义接口
     const api = {
-        getProducts() {
-            return axios.post('/news/index', {keywords: 4})
-        },
+        getProducts: (args) => axios.post('/news/index', args),
     }
 
-    //注册Vuex依赖
+    //TODO util
+    // 定义工具函数
+    const util = (function () {
+        const digitsRE = /(\d{3})(?=\d)/g
+        return {
+            currency: (value, currency, decimals) => {
+                value = parseFloat(value)
+                if (!isFinite(value) || (!value && value !== 0)) return ''
+                currency = currency != null ? currency : '$'
+                decimals = decimals != null ? decimals : 2
+                let stringified = Math.abs(value).toFixed(decimals);
+                let _int = decimals ? stringified.slice(0, -1 - decimals) : stringified
+                let i = _int.length % 3
+                let head = i > 0 ? (_int.slice(0, i) + (_int.length > 3 ? ',' : '')) : ''
+                let _float = decimals ? stringified.slice(-1 - decimals) : ''
+                let sign = value < 0 ? '-' : ''
+                return sign + currency + head + _int.slice(i).replace(digitsRE, '$1,') + _float
+            }
+        }
+    })();
+
+    //TODO Library
+    //注册Vue依赖
     Vue.use(Vuex);
     Vue.use(Router);
+    Vue.filter('currency', util.currency)
+
+    // TODO vuex
     //创建购物车状态
     const cart = {
         namespaced: true,
@@ -111,7 +138,7 @@
         getters: {},
         actions: {
             getAllProducts({commit}) {
-                api.getProducts().then(res => {
+                api.getProducts({keyword: 44}).then(res => {
                     commit('setProducts', res.data.articles)
                 }).catch(err => {
                     console.info(err)
@@ -138,26 +165,7 @@
         }
     })
 
-
-    const digitsRE = /(\d{3})(?=\d)/g
-    const currency = (value, currency, decimals) => {
-        value = parseFloat(value)
-        if (!isFinite(value) || (!value && value !== 0)) return ''
-        currency = currency != null ? currency : '$'
-        decimals = decimals != null ? decimals : 2
-        let stringified = Math.abs(value).toFixed(decimals);
-        let _int = decimals ? stringified.slice(0, -1 - decimals) : stringified
-        let i = _int.length % 3
-        let head = i > 0 ? (_int.slice(0, i) + (_int.length > 3 ? ',' : '')) : ''
-        let _float = decimals ? stringified.slice(-1 - decimals) : ''
-        let sign = value < 0 ? '-' : ''
-        return sign + currency + head + _int.slice(i).replace(digitsRE, '$1,') + _float
-    }
-
-    // 注册过滤器
-    Vue.filter('currency', currency)
-
-
+    // TODO components
     //创建购物车组件
     const ShoppingCart = {
         computed: {
@@ -225,7 +233,7 @@
                 </el-table>
         `
     }
-    // 
+    //创建入口组件
     const Main = {
         components: {ProductList, ShoppingCart}, // 注册组件
         template: `
@@ -234,7 +242,7 @@
                 <ShoppingCart/>
              </div>
         `
-        
+
     }
     const Detail = {
         template: `
@@ -243,7 +251,7 @@
              </div>
         `
     }
-    //创建App组件
+    //创建App容器组件
     const App = {
         template: `
             <div id="app">
@@ -251,20 +259,22 @@
              </div>
         `
     };
+
+    //TODO router
     // 配置路由
     const routes = [
         {
-            path:'/',
+            path: '/',
             redirect: '/home'
         },
         {
-            path:'/home',
-            name:'home',
+            path: '/home',
+            name: 'home',
             component: Main
         },
         {
-            path:'/detail',
-            name:'detail',
+            path: '/detail',
+            name: 'detail',
             component: Detail
         }
     ]
@@ -273,11 +283,13 @@
         routes,
         mode: 'hash', // history
     })
+
+    //TODO main
     //初始化Vue实例
     const app = new Vue({
         el: '#app',
         store: store,
-        router:router,
+        router: router,
         render: h => h(App)
     })
 })(Vue, Vuex, Mock, axios, VueRouter);
